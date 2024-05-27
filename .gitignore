@@ -1,7 +1,7 @@
 HELP.md
 .gradle
 build/
-taask.md
+task.md
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

@@ -1,0 +1,18 @@
+server:
+  port: 8088
+spring:
+
+  application:
+    name: individuals-api
+  flyway:
+    user: postgres
+    password: password
+    url: jdbc:postgresql://localhost:5432/person
+    locations: classpath:db/migration
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/person
+    username: postgres
+    password: password
+logging:
+  level:
+    root: info

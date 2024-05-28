@@ -1,0 +1,11 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Merchant -> individualsAPI: Authentication Request \n { "email": "string", "password": "string"}
+individualsAPI --> Keycloak: Authentication Request \n { "email": "string", "password": "string"}
+Keycloak -> individualsAPI: Authentication Response \n {"access_token": "string", "expires_in": 0, "refresh_token": "string","token_type": "string"}
+individualsAPI -> Merchant: Authentication Response \n {"access_token": "string", "expires_in": 0, "refresh_token": "string","token_type": "string"}
+
+@enduml

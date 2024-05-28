@@ -1,18 +1,30 @@
 server:
   port: 8088
 spring:
-
   application:
     name: individuals-api
-  flyway:
-    user: postgres
-    password: password
-    url: jdbc:postgresql://localhost:5432/person
-    locations: classpath:db/migration
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/person
     username: postgres
     password: password
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: indiapi
+            client-secret: IZ7dkBVNq5scAX5AYf3WCC5o7qUWJ4iK
+            provider: keycloak
+            scope: openid, profile, email, roles, microprofile-jwt
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8082/realms/merchants
+            user-name-attribute: preferred_username
+keycloak:
+  server-url: http://localhost:8082
+  realm: myRealm
+  username: admin
+  password: admin
 logging:
   level:
     root: info

@@ -12,8 +12,8 @@ spring:
       client:
         registration:
           keycloak:
-            client-id: indiapi
-            client-secret: IZ7dkBVNq5scAX5AYf3WCC5o7qUWJ4iK
+            client-id: myindiapi
+            client-secret: QOedjEtNVm2eO8dNoCvp3AUvOhyqtiC8
             provider: keycloak
             scope: openid, profile, email, roles, microprofile-jwt
         provider:
@@ -22,7 +22,7 @@ spring:
             user-name-attribute: preferred_username
 keycloak:
   server-url: http://localhost:8082
-  realm: myRealm
+  realm: master
   username: admin
   password: admin
 logging:

@@ -27,3 +27,5 @@ services:
       KC_DB_PASSWORD: "password"
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
+    depends_on:
+      - db

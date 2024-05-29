@@ -216,15 +216,15 @@
   "claims_parameter_supported": true,
   "scopes_supported": [
     "openid",
+    "offline_access",
+    "phone",
+    "address",
+    "profile",
     "roles",
     "microprofile-jwt",
-    "phone",
+    "acr",
     "web-origins",
-    "offline_access",
-    "profile",
-    "address",
-    "email",
-    "acr"
+    "email"
   ],
   "request_parameter_supported": true,
   "request_uri_parameter_supported": true,

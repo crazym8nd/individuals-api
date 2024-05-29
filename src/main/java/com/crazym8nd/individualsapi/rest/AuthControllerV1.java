@@ -16,7 +16,7 @@ public class AuthControllerV1 {
   //  private final UserService userService;
    // private final UserMapper userMapper;
 
-    @PostMapping("/register")
+    @PostMapping("/merchants/registration")
     public Mono<ResponseEntity<ResponseRegistrationDto>> register(@RequestBody RequestUsrDto usrDto) {
         ResponseRegistrationDto response = ResponseRegistrationDto.builder().build();
         return Mono.just(ResponseEntity.ok(response));

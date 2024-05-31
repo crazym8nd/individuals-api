@@ -3,28 +3,24 @@ server:
 spring:
   application:
     name: individuals-api
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/person
-    username: postgres
-    password: password
   security:
     oauth2:
       client:
         registration:
           keycloak:
-            client-id: myindiapi
-            client-secret: QOedjEtNVm2eO8dNoCvp3AUvOhyqtiC8
+            client-id: merchantsclient
+            client-secret: aQe2UelkaeGNnAUA8JV7p8Lnhdw03wqm
             provider: keycloak
             scope: openid, profile, email, roles, microprofile-jwt
         provider:
           keycloak:
-            issuer-uri: http://localhost:8082/realms/merchants
+            issuer-uri: http://localhost:8082/realms/merchantsrealm
             user-name-attribute: preferred_username
 keycloak:
   server-url: http://localhost:8082
-  realm: master
+  realm: merchantsrealm
   username: admin
   password: admin
 logging:
   level:
-    root: info
+    root: debug

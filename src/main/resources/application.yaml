@@ -15,10 +15,10 @@ jwt:
       principal-attribute: preferred_username
       resource-id: ${keycloak.clientId}
 keycloak:
-  realm: appauth
+  realm: merchants
   domain: localhost:9005
-  clientId: app-auth-client-id
-  clientSecret: bFWi1Tzwf1Tke4S4t1n6WColnNNmz2Kd
+  clientId: merchants-manager
+  clientSecret: 1C6AlBQedQnAmOPVD9TDjyKPLK163LP7
   urls:
     auth: http://${keycloak.domain}
 url-frontend-guest: http://localhost

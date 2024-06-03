@@ -1,4 +1,4 @@
-package com.crazym8nd.individualsapi.dto;
+package com.crazym8nd.individualsapi.dto.request;
 
 public record UserRegistration(String username,
                                      String email,

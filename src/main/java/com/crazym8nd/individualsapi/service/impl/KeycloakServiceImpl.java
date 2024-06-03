@@ -1,7 +1,7 @@
 package com.crazym8nd.individualsapi.service.impl;
 
-import com.crazym8nd.individualsapi.dto.LoginRequest;
-import com.crazym8nd.individualsapi.dto.UserRegistration;
+import com.crazym8nd.individualsapi.dto.request.LoginRequest;
+import com.crazym8nd.individualsapi.dto.request.UserRegistration;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -12,6 +12,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +46,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public ResponseEntity<?> getToken(LoginRequest request) {
+    public AccessTokenResponse getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -55,9 +56,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .username(request.username())
                 .password(request.password())
                 .build();
-        Map<String, Object> contentMap = new HashMap<>();
-        contentMap.put("content", keycloak.tokenManager().getAccessToken());
-        return new ResponseEntity<>(contentMap, HttpStatus.OK);
+        return keycloak.tokenManager().getAccessToken();
     }
 
     @Override
@@ -69,11 +68,13 @@ public class KeycloakServiceImpl implements KeycloakService {
         user.setFirstName(userRegistrationRecord.firstName());
         user.setLastName(userRegistrationRecord.lastName());
         user.setEmailVerified(false);
+        user.setRealmRoles(List.of("ROLE_MERCHANT"));
 
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
         credentialRepresentation.setValue(userRegistrationRecord.password());
         credentialRepresentation.setTemporary(false);
         credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+
 
         List<CredentialRepresentation> list = new ArrayList<>();
         list.add(credentialRepresentation);

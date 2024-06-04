@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -21,7 +22,7 @@ public class AuthControllerV1 {
 
 
     @PostMapping("/login")
-    public Mono<AccessTokenResponse> login(@RequestBody LoginRequest request) {
+    public Mono<ResponseEntity<AccessTokenResponse>> login(@RequestBody LoginRequest request) {
         return Mono.just(keycloakService.getToken(request));
     }
 

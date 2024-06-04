@@ -1,3 +1,4 @@
+
 server:
   port: 8080
 spring:
@@ -9,16 +10,23 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/${keycloak.realm}
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+        opaquetoken:
+          client-id: ${keycloak.clientId}
+          client-secret: ${keycloak.clientSecret}
+          introspection-uri: ${keycloak.urls.auth}/realms/${keycloak.realm}/protocol/openid-connect/token/introspect
 jwt:
   auth:
     converter:
       principal-attribute: preferred_username
       resource-id: ${keycloak.clientId}
 keycloak:
-  realm: merchants
+  realm: appauth
   domain: localhost:9005
-  clientId: merchants-manager
-  clientSecret: 1C6AlBQedQnAmOPVD9TDjyKPLK163LP7
+  clientId: app-auth-client-id
+  clientSecret: Bt7HY6M3aDZuK3h4uIFHlHN3Sg5soBM6
   urls:
     auth: http://${keycloak.domain}
 url-frontend-guest: http://localhost
+logging:
+  level:
+    root: info

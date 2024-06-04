@@ -46,7 +46,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public AccessTokenResponse getToken(LoginRequest request) {
+    public ResponseEntity<AccessTokenResponse> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -56,7 +56,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .username(request.username())
                 .password(request.password())
                 .build();
-        return keycloak.tokenManager().getAccessToken();
+        return new ResponseEntity<>(keycloak.tokenManager().getAccessToken(), HttpStatus.OK);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         user.setEmail(userRegistrationRecord.email());
         user.setFirstName(userRegistrationRecord.firstName());
         user.setLastName(userRegistrationRecord.lastName());
-        user.setEmailVerified(false);
+        user.setEmailVerified(true);
         user.setRealmRoles(List.of("ROLE_MERCHANT"));
 
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
@@ -111,7 +111,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         UserRepresentation user = users.get(0);
         log.info("Updating user {}", user);
         user.setFirstName("Long update");
-        // Cập nhật thông tin người dùng
         usersResource.get(user.getId()).update(user);
         log.info("User {} updated successfully", username);
     }

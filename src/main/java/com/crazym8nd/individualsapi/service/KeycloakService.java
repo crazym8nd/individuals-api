@@ -16,5 +16,5 @@ public interface KeycloakService {
     void deleteUserById(String userId);
     void emailVerification(String userId);
     void forgotPassword(String username);
-    AccessTokenResponse getToken(LoginRequest request);
+    ResponseEntity<AccessTokenResponse> getToken(LoginRequest request);
 }

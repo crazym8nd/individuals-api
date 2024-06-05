@@ -12,14 +12,12 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -46,7 +44,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public ResponseEntity<AccessTokenResponse> getToken(LoginRequest request) {
+    public ResponseEntity<?> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -56,22 +54,26 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .username(request.username())
                 .password(request.password())
                 .build();
-        return new ResponseEntity<>(keycloak.tokenManager().getAccessToken(), HttpStatus.OK);
+
+        Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("content", keycloak.tokenManager().getAccessToken());
+        return new ResponseEntity<>(contentMap, HttpStatus.OK);
+
     }
 
     @Override
     public UserRegistration createUser(UserRegistration userRegistrationRecord) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
-        user.setUsername(userRegistrationRecord.username());
-        user.setEmail(userRegistrationRecord.email());
-        user.setFirstName(userRegistrationRecord.firstName());
-        user.setLastName(userRegistrationRecord.lastName());
+        user.setUsername(userRegistrationRecord.getUsername());
+        user.setEmail(userRegistrationRecord.getEmail());
+        user.setFirstName(userRegistrationRecord.getFirstName());
+        user.setLastName(userRegistrationRecord.getLastName());
         user.setEmailVerified(true);
         user.setRealmRoles(List.of("ROLE_MERCHANT"));
 
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setValue(userRegistrationRecord.password());
+        credentialRepresentation.setValue(userRegistrationRecord.getPassword());
         credentialRepresentation.setTemporary(false);
         credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
 
@@ -86,18 +88,11 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         log.info("Created user {}", response.getStatus());
         if (Objects.equals(201, response.getStatus())) {
-
-            List<UserRepresentation> representationList = usersResource.searchByUsername(userRegistrationRecord.username(), true);
-            if (!CollectionUtils.isEmpty(representationList)) {
-                UserRepresentation userRepresentation1 = representationList.stream().filter(userRepresentation -> Objects.equals(false, userRepresentation.isEmailVerified())).findFirst().orElse(null);
-                assert userRepresentation1 != null;
-                emailVerification(userRepresentation1.getId());
-            }
             return userRegistrationRecord;
         }
 
 
-        return null;
+        return userRegistrationRecord;
     }
 
     @Override

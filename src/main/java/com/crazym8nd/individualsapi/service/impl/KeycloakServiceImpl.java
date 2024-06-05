@@ -12,14 +12,16 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -28,7 +30,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Value("${keycloak.realm}")
     private String realm;
 
-    private Keycloak keycloak;
+    private final Keycloak keycloak;
 
     @Value("${keycloak.urls.auth}")
     private String authServerUrl;
@@ -44,7 +46,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public ResponseEntity<?> getToken(LoginRequest request) {
+    public ResponseEntity<AccessTokenResponse> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -55,9 +57,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .password(request.password())
                 .build();
 
-        Map<String, Object> contentMap = new HashMap<>();
-        contentMap.put("content", keycloak.tokenManager().getAccessToken());
-        return new ResponseEntity<>(contentMap, HttpStatus.OK);
+        return ResponseEntity.ok(keycloak.tokenManager().getAccessToken());
 
     }
 
@@ -123,6 +123,15 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Override
     public UserRepresentation getUserById(String userId) {
         return getUsersResource().get(userId).toRepresentation();
+    }
+
+    @Override
+    public UserRepresentation getUserByUsername(String username) {
+        UsersResource usersResource = getUsersResource();
+        List<UserRepresentation> users = usersResource.search(username, true);
+        UserRepresentation user = users.get(0);
+        log.info("User {} found successfully", username);
+        return user;
     }
 
     @Override

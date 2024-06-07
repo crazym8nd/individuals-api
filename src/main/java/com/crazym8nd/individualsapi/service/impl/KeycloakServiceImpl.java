@@ -2,6 +2,8 @@ package com.crazym8nd.individualsapi.service.impl;
 
 import com.crazym8nd.individualsapi.dto.request.LoginRequest;
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
+import com.crazym8nd.individualsapi.dto.response.ResponseInfo;
+import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +11,10 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
 import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -43,7 +48,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public ResponseEntity<AccessTokenResponse> getToken(LoginRequest request) {
+    public ResponseEntity<ResponseTokenLogin> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -54,23 +59,28 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .password(request.password())
                 .build();
 
-        return ResponseEntity.ok(keycloak.tokenManager().getAccessToken());
+        ResponseEntity.ok(keycloak.tokenManager().getAccessToken());
+        return ResponseEntity.ok(ResponseTokenLogin.builder()
+                        .accessToken(keycloak.tokenManager().getAccessToken().getToken())
+                        .expiresIn(keycloak.tokenManager().getAccessToken().getExpiresIn())
+                        .refreshToken(keycloak.tokenManager().getAccessToken().getRefreshToken())
+                        .tokenType(keycloak.tokenManager().getAccessToken().getTokenType())
+                .build());
 
     }
 
     @Override
-    public UserRegistration createUser(UserRegistration userRegistrationRecord) {
+    public UserRegistration createUser(UserRegistration userRegistration) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
-        user.setUsername(userRegistrationRecord.getUsername());
-        user.setEmail(userRegistrationRecord.getEmail());
-        user.setFirstName(userRegistrationRecord.getFirstName());
-        user.setLastName(userRegistrationRecord.getLastName());
+        user.setUsername(userRegistration.getUsername());
+        user.setEmail(userRegistration.getEmail());
+        user.setFirstName(userRegistration.getFirstName());
+        user.setLastName(userRegistration.getLastName());
         user.setEmailVerified(true);
-        user.setRealmRoles(List.of("ROLE_MERCHANT"));
 
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setValue(userRegistrationRecord.getPassword());
+        credentialRepresentation.setValue(userRegistration.getPassword());
         credentialRepresentation.setTemporary(false);
         credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
 
@@ -85,7 +95,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         log.info("Created user {}", response.getStatus());
 
-        return userRegistrationRecord;
+        return userRegistration;
     }
 
 
@@ -100,7 +110,34 @@ public class KeycloakServiceImpl implements KeycloakService {
         UsersResource usersResource = getUsersResource();
         List<UserRepresentation> users = usersResource.search(username, true);
         UserRepresentation user = users.get(0);
-        log.info("User {} found successfully", username);
+
         return user;
+    }
+
+    @Override
+    public ResponseInfo getUserInfoAboutMe(String username) {
+        UsersResource usersResource = keycloak.realm(realm).users();
+        List<UserRepresentation> users = usersResource.search(username, true);
+        UserRepresentation user = users.get(0);
+        RoleMappingResource roleMappingResource = usersResource.get(user.getId()).roles();
+        Set<RoleRepresentation> realmRoles = roleMappingResource.realmLevel().listEffective().stream().collect(Collectors.toSet());
+        return ResponseInfo.builder()
+                .username(user.getUsername())
+                .role(null)
+                .build();
+    }
+
+
+    private ResponseInfo getUserInfoAboutMe2(String username) {
+        RealmResource realmForRole = keycloak.realm(realm);
+        UsersResource usersResource = getUsersResource();
+        List<UserRepresentation> users = usersResource.search(username, true);
+        UserRepresentation user = users.get(0);
+        log.info("User {} found successfully", username);
+        RoleRepresentation role = realmForRole.rolesById().getRole("1c9e03f4-ce49-4976-93a6-63732bf723fd");
+        return ResponseInfo.builder()
+                .username(user.getUsername())
+                .role(null)
+                .build();
     }
 }

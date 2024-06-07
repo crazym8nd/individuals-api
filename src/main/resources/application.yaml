@@ -23,7 +23,8 @@ keycloak:
   realm: appauth
   domain: localhost:9005
   clientId: app-auth-client-id
-  clientSecret: L4FPg8qebWjGB31VRSbL3fSHXhKjgHty
+  clientSecret: Bt7HY6M3aDZuK3h4uIFHlHN3Sg5soBM6
+  scopes: microprofile-jwt
   urls:
     auth: http://${keycloak.domain}
 url-frontend-guest: http://localhost

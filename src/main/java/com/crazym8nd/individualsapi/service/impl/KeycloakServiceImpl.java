@@ -3,14 +3,12 @@ package com.crazym8nd.individualsapi.service.impl;
 import com.crazym8nd.individualsapi.dto.request.LoginRequest;
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
 import com.crazym8nd.individualsapi.service.KeycloakService;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -87,43 +84,16 @@ public class KeycloakServiceImpl implements KeycloakService {
         Response response = usersResource.create(user);
 
         log.info("Created user {}", response.getStatus());
-        if (Objects.equals(201, response.getStatus())) {
-            return userRegistrationRecord;
-        }
-
 
         return userRegistrationRecord;
     }
 
-    @Override
-    public void updateUser(String username) {
-        UsersResource usersResource = getUsersResource();
-        List<UserRepresentation> users = usersResource.search(username, true);
-        if (users.isEmpty()) {
-            log.warn("User with username {} not found", username);
-            return;
-        }
-        UserRepresentation user = users.get(0);
-        log.info("Updating user {}", user);
-        user.setFirstName("Long update");
-        usersResource.get(user.getId()).update(user);
-        log.info("User {} updated successfully", username);
-    }
 
     private UsersResource getUsersResource() {
         RealmResource realm1 = keycloak.realm(realm);
         return realm1.users();
     }
 
-    public UserResource getUserResource(String userId) {
-        UsersResource usersResource = getUsersResource();
-        return usersResource.get(userId);
-    }
-
-    @Override
-    public UserRepresentation getUserById(String userId) {
-        return getUsersResource().get(userId).toRepresentation();
-    }
 
     @Override
     public UserRepresentation getUserByUsername(String username) {
@@ -133,32 +103,4 @@ public class KeycloakServiceImpl implements KeycloakService {
         log.info("User {} found successfully", username);
         return user;
     }
-
-    @Override
-    public void deleteUserById(String userId) {
-        getUsersResource().delete(userId);
-    }
-
-    @Override
-    public void emailVerification(String userId) {
-        UsersResource usersResource = getUsersResource();
-        usersResource.get(userId).sendVerifyEmail();
-    }
-
-    @Override
-    public void forgotPassword(String username) {
-        UsersResource usersResource = getUsersResource();
-        List<UserRepresentation> representationList = usersResource.searchByUsername(username, true);
-        UserRepresentation userRepresentation = representationList.stream().findFirst().orElse(null);
-        if (userRepresentation != null) {
-            UserResource userResource = getUserResource(userRepresentation.getId());
-            List<String> actions = new ArrayList<>();
-            actions.add("UPDATE_PASSWORD");
-            userResource.executeActionsEmail(actions);
-            return;
-        }
-        throw new NotFoundException("User not found");
-    }
-
-
 }

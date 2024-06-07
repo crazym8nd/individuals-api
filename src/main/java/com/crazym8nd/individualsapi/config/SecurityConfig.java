@@ -79,7 +79,6 @@ public class SecurityConfig {
                                             .filter(authority -> authority.startsWith("ROLE_"))
                                             .map(SimpleGrantedAuthority::new))
                             .toList();
-
                     return new DefaultOidcUser(grantedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo(),
                             "preferred_username");
                 });

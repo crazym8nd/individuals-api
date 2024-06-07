@@ -7,7 +7,6 @@ import com.crazym8nd.individualsapi.service.KeycloakService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,16 +32,6 @@ public class AuthControllerV1 {
     @PostMapping("/registration")
     public Mono<UserRegistration> createUser(@RequestBody UserRegistration userRegistration) {
         return Mono.just(keycloakService.createUser(userRegistration));
-    }
-
-    @GetMapping("/info/{userName}")
-    public Mono<?> getUserInfo(@PathVariable String userName, Mono<Principal> principalMono) {
-        Mono<UserRepresentation> userInfo = Mono.just(keycloakService.getUserById(userName));
-        return userInfo.flatMap(user -> {
-            String logMessage = String.format("Username: %s, Email: %s",
-                    user.getUsername(), user.getEmail());
-            return Mono.just(logMessage);
-        }).onErrorResume(error -> Mono.error(new RuntimeException("Internal server error")));
     }
 
     @GetMapping("/info/me")

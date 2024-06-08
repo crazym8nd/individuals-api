@@ -2,7 +2,6 @@ package com.crazym8nd.individualsapi.service.impl;
 
 import com.crazym8nd.individualsapi.dto.request.LoginRequest;
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
-import com.crazym8nd.individualsapi.dto.response.ResponseInfo;
 import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.ws.rs.core.Response;
@@ -10,12 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.*;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RolesResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -23,8 +24,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -49,7 +48,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public Mono<ResponseEntity<ResponseTokenLogin>> getToken(LoginRequest request) {
+    public Mono<ResponseTokenLogin> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -60,13 +59,12 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .password(request.password())
                 .build();
 
-        ResponseEntity.ok(keycloak.tokenManager().getAccessToken());
-        return Mono.just(ResponseEntity.ok(ResponseTokenLogin.builder()
+        return Mono.just(ResponseTokenLogin.builder()
                         .accessToken(keycloak.tokenManager().getAccessToken().getToken())
                         .expiresIn(keycloak.tokenManager().getAccessToken().getExpiresIn())
                         .refreshToken(keycloak.tokenManager().getAccessToken().getRefreshToken())
                         .tokenType(keycloak.tokenManager().getAccessToken().getTokenType())
-                .build()));
+                .build());
 
     }
 
@@ -107,47 +105,12 @@ public class KeycloakServiceImpl implements KeycloakService {
         return realm1.users();
     }
 
-
-    @Override
-    public Mono<UserRepresentation> getUserByUsername(String username) {
-        UsersResource usersResource = getUsersResource();
-        List<UserRepresentation> users = usersResource.search(username, true);
-        UserRepresentation user = users.get(0);
-
-        return Mono.just(user);
-    }
-
-    @Override
-    public Mono<ResponseInfo> getUserInfoAboutMe(String username) {
-        UsersResource usersResource = keycloak.realm(realm).users();
-        List<UserRepresentation> users = usersResource.search(username, true);
-        UserRepresentation user = users.get(0);
-        RoleMappingResource roleMappingResource = usersResource.get(user.getId()).roles();
-        Set<RoleRepresentation> realmRoles = roleMappingResource.realmLevel().listEffective().stream().collect(Collectors.toSet());
-        return Mono.just(ResponseInfo.builder()
-                .username(user.getUsername())
-                .role(null)
-                .build());
-    }
-
     @Override
     public Mono<UserResource> getUserResource(String userId){
         UsersResource usersResource = getUsersResource();
         return Mono.just(usersResource.get(userId));
     }
 
-    private ResponseInfo getUserInfoAboutMe2(String username) {
-        RealmResource realmForRole = keycloak.realm(realm);
-        UsersResource usersResource = getUsersResource();
-        List<UserRepresentation> users = usersResource.search(username, true);
-        UserRepresentation user = users.get(0);
-        log.info("User {} found successfully", username);
-        RoleRepresentation role = realmForRole.rolesById().getRole("1c9e03f4-ce49-4976-93a6-63732bf723fd");
-        return ResponseInfo.builder()
-                .username(user.getUsername())
-                .role(null)
-                .build();
-    }
 
     @Override
     public Mono<Void> assignRole(String userId, String roleName) {

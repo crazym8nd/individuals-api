@@ -9,6 +9,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 
 public interface KeycloakService {
+
     void assignRole(String userId, String roleName);
 
     String createUser(UserRegistration userRegistration, String roleName);

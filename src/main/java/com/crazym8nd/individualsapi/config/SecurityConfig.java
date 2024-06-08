@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/v1/auth/info/**").authenticated()
                         .anyExchange()
                         .authenticated())
+
                 .oauth2ResourceServer(customizer -> customizer.jwt(jwt -> {
                     ReactiveJwtAuthenticationConverter jwtAuthenticationConverter = new ReactiveJwtAuthenticationConverter();
                     jwtAuthenticationConverter.setPrincipalClaimName("preferred_username");

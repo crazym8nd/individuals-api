@@ -43,7 +43,7 @@ public class AuthControllerV1 {
                         .body(ResponseRegistration.builder()
                                 .username(userRegistration.getUsername())
                                 .email(userRegistration.getEmail())
-                                .message("User registered with id: " + registeredUser )
+                                .message("Merchant registered with id: " + registeredUser )
                                 .build()));
     }
 
@@ -55,7 +55,7 @@ public class AuthControllerV1 {
                         .body(ResponseRegistration.builder()
                                 .username(userRegistration.getUsername())
                                 .email(userRegistration.getEmail())
-                                .message("User registered with id: " + registeredUser )
+                                .message("Individual registered with id: " + registeredUser )
                                 .build()));
     }
 

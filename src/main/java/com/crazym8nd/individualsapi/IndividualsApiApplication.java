@@ -9,8 +9,6 @@ public class IndividualsApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(IndividualsApiApplication.class, args);
     }
-        // sdelat tak chto bi rzaregistrirovannii user stanovilsya merchantom
-    // dobavit dto dlya user info
-    // dobavit dto dlya tokena
     // testi
+    //raznesti vse gramotno
 }

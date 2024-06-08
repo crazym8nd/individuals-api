@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.RoleMappingResource;
-import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.admin.client.resource.*;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -20,7 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,7 +70,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public UserRegistration createUser(UserRegistration userRegistration) {
+    public String createUser(UserRegistration userRegistration, String roleName) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistration.getUsername());
@@ -92,10 +92,12 @@ public class KeycloakServiceImpl implements KeycloakService {
         UsersResource usersResource = getUsersResource();
 
         Response response = usersResource.create(user);
+        URI uri = response.getLocation();
+        String createdUserId = uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
+        log.info("Created user {}", createdUserId);
 
-        log.info("Created user {}", response.getStatus());
-
-        return userRegistration;
+        assignRole(createdUserId,roleName);
+        return createdUserId;
     }
 
 
@@ -127,6 +129,11 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .build();
     }
 
+    @Override
+    public UserResource getUserResource(String userId){
+        UsersResource usersResource = getUsersResource();
+        return usersResource.get(userId);
+    }
 
     private ResponseInfo getUserInfoAboutMe2(String username) {
         RealmResource realmForRole = keycloak.realm(realm);
@@ -139,5 +146,21 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .username(user.getUsername())
                 .role(null)
                 .build();
+    }
+
+    @Override
+    public void assignRole(String userId, String roleName) {
+
+        UserResource userResource = getUserResource(userId);
+        RolesResource rolesResource = getRolesResource();
+        RoleRepresentation representation = rolesResource.get(roleName).toRepresentation();
+
+        log.info(rolesResource.get(roleName).toRepresentation().toString());
+        userResource.roles().realmLevel().add(Collections.singletonList(representation));
+
+    }
+
+    private RolesResource getRolesResource(){
+        return  keycloak.realm(realm).roles();
     }
 }

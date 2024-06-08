@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 @Configuration
 public class SecurityConfig {
 
-    private final String[] publicRoutes = {"/api/v1/auth/registration", "api/v1/auth/login"};
+    private final String[] publicRoutes = {"/api/v1/auth/register/**", "api/v1/auth/login"};
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {

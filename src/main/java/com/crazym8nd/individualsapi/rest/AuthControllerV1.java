@@ -35,15 +35,27 @@ public class AuthControllerV1 {
         return Mono.just(keycloakService.getToken(request));
     }
 
-    @PostMapping("/registration")
-    public Mono<ResponseEntity<ResponseRegistration>> createUser(@RequestBody UserRegistration userRegistration) {
-        return Mono.just(keycloakService.createUser(userRegistration))
+    @PostMapping("/register/merchants")
+    public Mono<ResponseEntity<ResponseRegistration>> createMerchant(@RequestBody UserRegistration userRegistration) {
+        return Mono.just(keycloakService.createUser(userRegistration, "MERCHANTS"))
                 .map(registeredUser -> ResponseEntity
                         .status(HttpStatus.CREATED)
                         .body(ResponseRegistration.builder()
-                                .username(registeredUser.getUsername())
-                                .email(registeredUser.getEmail())
-                                .message("Successful registration!")
+                                .username(userRegistration.getUsername())
+                                .email(userRegistration.getEmail())
+                                .message("User registered with id: " + registeredUser )
+                                .build()));
+    }
+
+    @PostMapping("/register/individuals")
+    public Mono<ResponseEntity<ResponseRegistration>> createIndividual(@RequestBody UserRegistration userRegistration) {
+        return Mono.just(keycloakService.createUser(userRegistration, "INDIVIDUALS"))
+                .map(registeredUser -> ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(ResponseRegistration.builder()
+                                .username(userRegistration.getUsername())
+                                .email(userRegistration.getEmail())
+                                .message("User registered with id: " + registeredUser )
                                 .build()));
     }
 
@@ -55,7 +67,7 @@ public class AuthControllerV1 {
                     Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
                     List<String> roleList = authorities.stream()
                             .map(GrantedAuthority::getAuthority)
-                            .filter(role -> role.equals("ROLE_MERCHANT") || role.equals("ROLE_INDIVIDUAL"))
+                            .filter(role -> role.equals("ROLE_MERCHANTS") || role.equals("ROLE_INDIVIDUALS"))
                             .toList();
                     return Mono.just(ResponseInfo.builder()
                                     .username(principal.getName())

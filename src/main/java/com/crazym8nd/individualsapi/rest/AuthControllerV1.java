@@ -32,7 +32,7 @@ public class AuthControllerV1 {
 
     @PostMapping("/login")
     public Mono<ResponseEntity<ResponseTokenLogin>> login(@RequestBody LoginRequest request) {
-        return Mono.just(keycloakService.getToken(request));
+        return keycloakService.getToken(request);
     }
 
     @PostMapping("/register/merchants")
@@ -43,7 +43,7 @@ public class AuthControllerV1 {
                         .body(ResponseRegistration.builder()
                                 .username(userRegistration.getUsername())
                                 .email(userRegistration.getEmail())
-                                .message("Merchant registered with id: " + registeredUser )
+                                .message("Merchant successfully registered!")
                                 .build()));
     }
 
@@ -55,7 +55,7 @@ public class AuthControllerV1 {
                         .body(ResponseRegistration.builder()
                                 .username(userRegistration.getUsername())
                                 .email(userRegistration.getEmail())
-                                .message("Individual registered with id: " + registeredUser )
+                                .message("Individual successfully registered!")
                                 .build()));
     }
 

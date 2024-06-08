@@ -7,16 +7,17 @@ import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Mono;
 
 public interface KeycloakService {
 
-    void assignRole(String userId, String roleName);
+    Mono<Void> assignRole(String userId, String roleName);
 
-    String createUser(UserRegistration userRegistration, String roleName);
+    Mono<String> createUser(UserRegistration userRegistration, String roleName);
 
-    UserRepresentation getUserByUsername(String username);
-    ResponseInfo getUserInfoAboutMe(String username);
-    UserResource getUserResource(String userId);
+    Mono<UserRepresentation> getUserByUsername(String username);
+    Mono<ResponseInfo> getUserInfoAboutMe(String username);
+    Mono<UserResource> getUserResource(String userId);
 
-    ResponseEntity<ResponseTokenLogin> getToken(LoginRequest request);
+    Mono<ResponseEntity<ResponseTokenLogin>> getToken(LoginRequest request);
 }

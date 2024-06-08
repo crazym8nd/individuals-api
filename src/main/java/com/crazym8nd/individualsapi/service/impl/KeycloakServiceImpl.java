@@ -17,6 +17,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public ResponseEntity<ResponseTokenLogin> getToken(LoginRequest request) {
+    public Mono<ResponseEntity<ResponseTokenLogin>> getToken(LoginRequest request) {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .realm(realm)
@@ -60,17 +61,17 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .build();
 
         ResponseEntity.ok(keycloak.tokenManager().getAccessToken());
-        return ResponseEntity.ok(ResponseTokenLogin.builder()
+        return Mono.just(ResponseEntity.ok(ResponseTokenLogin.builder()
                         .accessToken(keycloak.tokenManager().getAccessToken().getToken())
                         .expiresIn(keycloak.tokenManager().getAccessToken().getExpiresIn())
                         .refreshToken(keycloak.tokenManager().getAccessToken().getRefreshToken())
                         .tokenType(keycloak.tokenManager().getAccessToken().getTokenType())
-                .build());
+                .build()));
 
     }
 
     @Override
-    public String createUser(UserRegistration userRegistration, String roleName) {
+    public Mono<String> createUser(UserRegistration userRegistration, String roleName) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistration.getUsername());
@@ -97,7 +98,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         log.info("Created user {}", createdUserId);
 
         assignRole(createdUserId,roleName);
-        return createdUserId;
+        return Mono.just(createdUserId);
     }
 
 
@@ -108,31 +109,31 @@ public class KeycloakServiceImpl implements KeycloakService {
 
 
     @Override
-    public UserRepresentation getUserByUsername(String username) {
+    public Mono<UserRepresentation> getUserByUsername(String username) {
         UsersResource usersResource = getUsersResource();
         List<UserRepresentation> users = usersResource.search(username, true);
         UserRepresentation user = users.get(0);
 
-        return user;
+        return Mono.just(user);
     }
 
     @Override
-    public ResponseInfo getUserInfoAboutMe(String username) {
+    public Mono<ResponseInfo> getUserInfoAboutMe(String username) {
         UsersResource usersResource = keycloak.realm(realm).users();
         List<UserRepresentation> users = usersResource.search(username, true);
         UserRepresentation user = users.get(0);
         RoleMappingResource roleMappingResource = usersResource.get(user.getId()).roles();
         Set<RoleRepresentation> realmRoles = roleMappingResource.realmLevel().listEffective().stream().collect(Collectors.toSet());
-        return ResponseInfo.builder()
+        return Mono.just(ResponseInfo.builder()
                 .username(user.getUsername())
                 .role(null)
-                .build();
+                .build());
     }
 
     @Override
-    public UserResource getUserResource(String userId){
+    public Mono<UserResource> getUserResource(String userId){
         UsersResource usersResource = getUsersResource();
-        return usersResource.get(userId);
+        return Mono.just(usersResource.get(userId));
     }
 
     private ResponseInfo getUserInfoAboutMe2(String username) {
@@ -149,15 +150,14 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public void assignRole(String userId, String roleName) {
-
-        UserResource userResource = getUserResource(userId);
+    public Mono<Void> assignRole(String userId, String roleName) {
+        UserResource userResource = getUserResource(userId).block();
         RolesResource rolesResource = getRolesResource();
         RoleRepresentation representation = rolesResource.get(roleName).toRepresentation();
 
         log.info(rolesResource.get(roleName).toRepresentation().toString());
         userResource.roles().realmLevel().add(Collections.singletonList(representation));
-
+        return Mono.empty();
     }
 
     private RolesResource getRolesResource(){

@@ -10,5 +10,4 @@ public class IndividualsApiApplication {
         SpringApplication.run(IndividualsApiApplication.class, args);
     }
     // testi
-    //raznesti vse gramotno
 }

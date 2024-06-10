@@ -1,21 +1,32 @@
-
 server:
-  port: 8080
+  port: 8085
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/appauth
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+        opaquetoken:
+          client-id: app-auth-client-id
+          client-secret: FuXDordwvRlgaCasQ1xsqi6s9pkAuQPI
+          introspection-uri: http://localhost:8080/realms/appauth/protocol/openid-connect/token/introspect
+  jwt:
+    auth:
+      converter:
+        principal-attribute: preferred_username
+        resource-id: app-auth-client-id
+  keycloak:
+    urls:
+      auth: http://localhost:8080
+  url-frontend-guest: http://localhost
+  logging:
+    level:
+      root: info
   application:
     name: individuals-api
   main:
     allow-bean-definition-overriding: true
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-
-  sql:
-    init:
-      mode: always
+  config:
+    activate:
+      on-profile: test

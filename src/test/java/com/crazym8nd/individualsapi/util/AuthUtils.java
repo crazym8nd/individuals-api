@@ -1,6 +1,7 @@
 package com.crazym8nd.individualsapi.util;
 
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
+import org.keycloak.representations.AccessTokenResponse;
 
 public class AuthUtils {
 
@@ -14,4 +15,12 @@ public class AuthUtils {
                 .build();
     }
 
+    public static AccessTokenResponse fakeTokenForGetTokenTest(){
+        AccessTokenResponse fakeToken = new AccessTokenResponse();
+        fakeToken.setToken("fakeToken");
+        fakeToken.setExpiresIn(3600);
+        fakeToken.setRefreshToken("refreshToken");
+        fakeToken.setTokenType("Bearer");
+        return fakeToken;
+    }
 }

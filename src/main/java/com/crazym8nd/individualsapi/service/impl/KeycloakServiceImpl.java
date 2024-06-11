@@ -10,7 +10,6 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -71,7 +70,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         list.add(credentialRepresentation);
         user.setCredentials(list);
 
-        UsersResource usersResource = getUsersResource();
+        UsersResource usersResource = keycloak.realm(realm).users();
 
         Response response = usersResource.create(user);
         URI uri = response.getLocation();
@@ -86,15 +85,9 @@ public class KeycloakServiceImpl implements KeycloakService {
         }
     }
 
-
-    private UsersResource getUsersResource() {
-        RealmResource realm1 = keycloak.realm(realm);
-        return realm1.users();
-    }
-
     @Override
     public Mono<UserResource> getUserResource(String userId){
-        UsersResource usersResource = getUsersResource();
+        UsersResource usersResource = keycloak.realm(realm).users();
         return Mono.just(usersResource.get(userId));
     }
 

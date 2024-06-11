@@ -17,6 +17,7 @@ spring:
         principal-attribute: preferred_username
         resource-id: app-auth-client-id
   keycloak:
+    realm: appauth
     urls:
       auth: http://localhost:8080
   url-frontend-guest: http://localhost

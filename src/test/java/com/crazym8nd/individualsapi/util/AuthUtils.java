@@ -23,4 +23,14 @@ public class AuthUtils {
         fakeToken.setTokenType("Bearer");
         return fakeToken;
     }
+
+    public static UserRegistration validUserRegistrationForRegistrationTest(){
+        return UserRegistration.builder()
+                .username("validUsername")
+                .email("validemail@mail.com")
+                .firstName("validFirstName")
+                .lastName("validLastName")
+                .password("password")
+                .build();
+    }
 }

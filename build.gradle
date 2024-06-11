@@ -47,7 +47,7 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation 'com.github.dasniko:testcontainers-keycloak:3.3.1'
-
+    testImplementation 'com.h2database:h2:2.2.224'
 
     //if dns resolving not working by default for mac os
    //testImplementation 'io.projectreactor.netty:reactor-netty-http:1.0.39'

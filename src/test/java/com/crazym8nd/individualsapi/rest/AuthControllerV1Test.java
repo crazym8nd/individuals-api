@@ -1,61 +1,55 @@
 package com.crazym8nd.individualsapi.rest;
 
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
-import com.crazym8nd.individualsapi.service.KeycloakService;
 import com.crazym8nd.individualsapi.util.AuthUtils;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.main.allow-bean-definition-overriding=true")
 @Testcontainers
-@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yaml")
 class AuthControllerV1Test {
 
+    @Container
+    KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.4")
+            .withEnv("DB_VENDOR", "h2")
+            .withEnv("DB_URL", "jdbc:h2:mem:testdb")
+            .withEnv("DB_USER", "sa")
+            .withEnv("DB_PASSWORD", "")
+            .withRealmImportFile("realm-export-test.json");
 
-    @Autowired
-    private KeycloakService keycloakService;
+    @Bean
+    @Primary
+    public Keycloak keycloak() {
+        return KeycloakBuilder.builder()
+                .serverUrl(keycloakContainer.getAuthServerUrl())
+                .realm("appauth")
+                .clientId(KeycloakContainer.ADMIN_CLI_CLIENT)
+                .username(keycloakContainer.getAdminUsername())
+                .password(keycloakContainer.getAdminPassword())
+                .build();
+    }
+
 
     @Autowired
     private WebTestClient webTestClient;
 
-    static KeycloakContainer keycloak;
+    @Test
+    @DisplayName("Load context")
+    void loadContext() {
 
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:16-alpine"
-    );
-
-    @BeforeEach
-    void setUp() {
-        if (!postgres.isRunning()) {
-            postgres.start();
-        }
-        if (keycloak == null) {
-            keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.4")
-                    .withEnv("DB_VENDOR", "POSTGRES")
-                    .withEnv("DB_ADDR", postgres.getHost())
-                    .withEnv("DB_PORT", String.valueOf(postgres.getMappedPort(5432)))
-                    .withEnv("DB_DATABASE", postgres.getDatabaseName())
-                    .withEnv("DB_USER", postgres.getUsername())
-                    .withEnv("DB_PASSWORD", postgres.getPassword())
-                    .withRealmImportFile("realm-export-test.json");
-            keycloak.start();
-        }
-        System.setProperty("keycloak.clientId", "app-auth-client-id");
-        System.setProperty("keycloak.clientSecret", "FuXDordwvRlgaCasQ1xsqi6s9pkAuQPI");
-        System.setProperty("keycloak.urls.auth", keycloak.getAuthServerUrl());
 
     }
 

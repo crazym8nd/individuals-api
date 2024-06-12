@@ -32,7 +32,7 @@ public class AuthControllerV1 {
 
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<ResponseTokenLogin>> login(@RequestBody LoginRequest request) {
+    public Mono<ResponseEntity<ResponseTokenLogin>> login(@Valid @RequestBody LoginRequest request) {
         return keycloakService.getToken(request)
                 .map(ResponseEntity::ok);
     }

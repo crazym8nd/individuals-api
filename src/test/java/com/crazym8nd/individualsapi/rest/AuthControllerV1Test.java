@@ -28,6 +28,8 @@ class AuthControllerV1Test extends KeycloakTestContainers {
     void loadContext() {
     }
 
+
+    //happy path
     @Test
     @DisplayName("Should return 201 response fore creation of merchant")
     public void givenValidMerchantRegistration_whenRegisterMerchant_then201Response() {
@@ -60,38 +62,6 @@ class AuthControllerV1Test extends KeycloakTestContainers {
     }
 
     @Test
-    @DisplayName("Should return 400 response for error creation of individual")
-    public void givenInvalidIndividualRegistration_whenRegisterIndividual_thenBadRequestResponse() {
-
-        // Given
-        UserRegistration validUserRegistration = AuthUtils.invalidJsonForCreatingTest();
-
-        // When
-        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/register/individuals")
-                .body(Mono.just(validUserRegistration), UserRegistration.class)
-                .exchange();
-
-        // Then
-        result.expectStatus().isBadRequest();
-    }
-    @Test
-    @DisplayName("Should return 400 response for error creation of merchant")
-    public void givenInvalidMerchantRegistration_whenRegisterIndividual_thenBadRequestResponse() {
-
-        // Given
-        UserRegistration validUserRegistration = AuthUtils.invalidJsonForCreatingTest();
-
-        // When
-        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/register/merchants")
-                .body(Mono.just(validUserRegistration), UserRegistration.class)
-                .exchange();
-
-        // Then
-        result.expectStatus().isBadRequest();
-    }
-
-
-    @Test
     @DisplayName("Should return valid access token")
     public void givenValidLoginRequest_whenLogin_thenGetAccessToken() {
         // Given
@@ -109,23 +79,7 @@ class AuthControllerV1Test extends KeycloakTestContainers {
         result.expectStatus().isOk();
     }
 
-    @Test
-    @DisplayName("Should return unauthorized when login")
-    public void givenInvalidLoginRequest_whenLogin_thenReturnUnAuthorized() {
-        // Given
-        WebTestClient.ResponseSpec register = webTestClient.post().uri("/api/v1/auth/register/merchants")
-                .body(Mono.just(AuthUtils.registrationForLoginTest()), UserRegistration.class)
-                .exchange();
-        LoginRequest validLoginRequest = AuthUtils.jsonForLoginInvalidTest();
 
-        // When
-        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/login")
-                .body(Mono.just(validLoginRequest), LoginRequest.class)
-                .exchange();
-
-        // Then
-        result.expectStatus().isUnauthorized();
-    }
 
     @Test
     @DisplayName("Should return information about user")
@@ -155,6 +109,7 @@ class AuthControllerV1Test extends KeycloakTestContainers {
                 .expectBody(ResponseInfo.class);
     }
 
+    // unhappy path
     @Test
     @DisplayName("Should return not authorized if token is not valid")
     public void givenInvalidToken_whenGettingUserInfo_thenReturnNotAuthorized() {
@@ -164,6 +119,56 @@ class AuthControllerV1Test extends KeycloakTestContainers {
         // When
         WebTestClient.ResponseSpec result = webTestClient.get().uri("/api/v1/auth/info/me")
                 .headers(headers -> headers.setBearerAuth(tokenValue))
+                .exchange();
+
+        // Then
+        result.expectStatus().isUnauthorized();
+    }
+
+    @Test
+    @DisplayName("Should return 400 response for error creation of individual")
+    public void givenInvalidIndividualRegistration_whenRegisterIndividual_thenBadRequestResponse() {
+
+        // Given
+        UserRegistration validUserRegistration = AuthUtils.invalidJsonForCreatingTest();
+
+        // When
+        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/register/individuals")
+                .body(Mono.just(validUserRegistration), UserRegistration.class)
+                .exchange();
+
+        // Then
+        result.expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should return 400 response for error creation of merchant")
+    public void givenInvalidMerchantRegistration_whenRegisterIndividual_thenBadRequestResponse() {
+
+        // Given
+        UserRegistration validUserRegistration = AuthUtils.invalidJsonForCreatingTest();
+
+        // When
+        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/register/merchants")
+                .body(Mono.just(validUserRegistration), UserRegistration.class)
+                .exchange();
+
+        // Then
+        result.expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should return unauthorized when login")
+    public void givenInvalidLoginRequest_whenLogin_thenReturnUnAuthorized() {
+        // Given
+        WebTestClient.ResponseSpec register = webTestClient.post().uri("/api/v1/auth/register/merchants")
+                .body(Mono.just(AuthUtils.registrationForLoginTest()), UserRegistration.class)
+                .exchange();
+        LoginRequest validLoginRequest = AuthUtils.jsonForLoginInvalidTest();
+
+        // When
+        WebTestClient.ResponseSpec result = webTestClient.post().uri("/api/v1/auth/login")
+                .body(Mono.just(validLoginRequest), LoginRequest.class)
                 .exchange();
 
         // Then

@@ -1,38 +1,27 @@
-server:
-  port: 8085
 spring:
+  application:
+    name: individuals-api
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/appauth
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
         opaquetoken:
-          client-id: app-auth-client-id
-          client-secret: FuXDordwvRlgaCasQ1xsqi6s9pkAuQPI
-          introspection-uri: http://localhost:8080/realms/appauth/protocol/openid-connect/token/introspect
-  jwt:
-    auth:
-      converter:
-        principal-attribute: preferred_username
-        resource-id: app-auth-client-id
-  keycloak:
-    realm: appauth
-    urls:
-      auth: http://localhost:8080
-  url-frontend-guest: http://localhost
-  logging:
-    level:
-      root: info
-  application:
-    name: individuals-api
-  main:
-    allow-bean-definition-overriding: true
-  config:
-    activate:
-      on-profile: test
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+          client-id: ${keycloak.clientId}
+          client-secret: ${keycloak.clientSecret}
+          introspection-uri: ${keycloak.urls.auth}/realms/${keycloak.realm}/protocol/openid-connect/token/introspect
+jwt:
+  auth:
+    converter:
+      principal-attribute: preferred_username
+      resource-id: ${keycloak.clientId}
+keycloak:
+  realm: appauth
+  clientId: app-auth-client-id
+  clientSecret: Oe5AVBjMyNvYQD3ht2XjSJZWiqg6JMO9
+  urls:
+    auth: http://${keycloak.domain}
+url-frontend-guest: http://localhost
+logging:
+  level:
+    root: info

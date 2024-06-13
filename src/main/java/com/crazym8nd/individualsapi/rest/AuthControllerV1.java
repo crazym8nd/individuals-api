@@ -7,6 +7,7 @@ import com.crazym8nd.individualsapi.dto.response.ResponseInfo;
 import com.crazym8nd.individualsapi.dto.response.ResponseRegistration;
 import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import com.crazym8nd.individualsapi.exceptionhandling.InvalidCreatingUserException;
+import com.crazym8nd.individualsapi.service.AuthService;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,12 +29,13 @@ import java.util.List;
 @Slf4j
 public class AuthControllerV1 {
     private final KeycloakService keycloakService;
+    private final AuthService authService;
 
 
 
     @PostMapping("/login")
     public Mono<ResponseEntity<ResponseTokenLogin>> login(@Valid @RequestBody LoginRequest request) {
-        return keycloakService.getToken(request)
+        return authService.getToken(request)
                 .map(ResponseEntity::ok);
     }
 

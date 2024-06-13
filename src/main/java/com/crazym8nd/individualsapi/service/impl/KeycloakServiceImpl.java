@@ -1,15 +1,12 @@
 package com.crazym8nd.individualsapi.service.impl;
 
-import com.crazym8nd.individualsapi.dto.request.LoginRequest;
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
-import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import com.crazym8nd.individualsapi.exceptionhandling.InvalidLoginException;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -28,6 +25,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class KeycloakServiceImpl implements KeycloakService {
 
     @Value("${keycloak.realm}")
@@ -35,46 +33,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     private final Keycloak keycloak;
 
-    @Value("${keycloak.urls.auth}")
-    private String authServerUrl;
 
-    @Value("${keycloak.clientId}")
-    private String clientId;
-
-    @Value("${keycloak.clientSecret}")
-    private String clientSecret;
-
-    public KeycloakServiceImpl(Keycloak keycloak) {
-        this.keycloak = keycloak;
-    }
-
-    @Override
-    public Mono<ResponseTokenLogin> getToken(LoginRequest request) {
-try{
-        if (request.username() == null || request.password() == null) {
-            return Mono.error(new InvalidLoginException("Invalid credentials"));
-        }
-            Keycloak keycloak = KeycloakBuilder.builder()
-                    .serverUrl(authServerUrl)
-                    .realm(realm)
-                    .clientId(clientId)
-                    .clientSecret(clientSecret)
-                    .grantType(OAuth2Constants.PASSWORD)
-                    .username(request.username())
-                    .password(request.password())
-                    .build();
-            return Mono.just(ResponseTokenLogin.builder()
-                    .accessToken(keycloak.tokenManager().getAccessToken().getToken())
-                    .expiresIn(keycloak.tokenManager().getAccessToken().getExpiresIn())
-                    .refreshToken(keycloak.tokenManager().getAccessToken().getRefreshToken())
-                    .tokenType(keycloak.tokenManager().getAccessToken().getTokenType())
-                    .build());
-
-
-    } catch (Exception e) {
-        return Mono.error(new InvalidLoginException("Invalid credentials"));
-    }
-        }
 
     @Override
     public Mono<String> createUser(UserRegistration userRegistration, String roleName) {
@@ -99,7 +58,11 @@ try{
         UsersResource usersResource = getUsersResource();
 
         Response response = usersResource.create(user);
+        if (response.getStatus() != 201) {
+            return Mono.error(new InvalidLoginException("Invalid credentials"));
+        }
         URI uri = response.getLocation();
+
         String createdUserId = uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
         log.info("Created user {}", createdUserId);
 

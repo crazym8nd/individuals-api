@@ -1,10 +1,9 @@
-Необходимо реализовать individuals api (оркестратор), который будет отвечать за взаимодействие с внешним миром и оркестрацию вызовов “внутренних” сервисов.
+Impplementation of  individual api (orchestrator), which will be responsible for interaction with the outside world and orchestration of calls to "internal" services.
 
-Функционал:
-- Регистрация и логин пользователей
-- Получение данных по пользователю
-- Данные о пользователе хранятся в KeyCloak (данные для аутентификации).
-
+Functionality:
+- User registration and login
+- Obtaining user data
+- User data is stored in KeyCloak (authentication data).
 
 Technology stack:
 - Java 21

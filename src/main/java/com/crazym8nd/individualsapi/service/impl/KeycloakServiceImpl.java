@@ -1,7 +1,7 @@
 package com.crazym8nd.individualsapi.service.impl;
 
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
-import com.crazym8nd.individualsapi.exceptionhandling.InvalidLoginException;
+import com.crazym8nd.individualsapi.exceptionhandling.InvalidCreatingUserException;
 import com.crazym8nd.individualsapi.service.KeycloakService;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +37,10 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     @Override
     public Mono<String> createUser(UserRegistration userRegistration, String roleName) {
+        if (userRegistration.getUsername() == null || userRegistration.getPassword() == null || userRegistration.getEmail() == null) {
+            return Mono.error(new InvalidCreatingUserException("Invalid credentials"));
+        }
+
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistration.getUsername());
@@ -59,7 +63,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         Response response = usersResource.create(user);
         if (response.getStatus() != 201) {
-            return Mono.error(new InvalidLoginException("Invalid credentials"));
+            return Mono.error(new InvalidCreatingUserException("Invalid credentials"));
         }
         URI uri = response.getLocation();
 

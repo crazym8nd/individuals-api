@@ -3,6 +3,7 @@ package com.crazym8nd.individualsapi.service.impl;
 import com.crazym8nd.individualsapi.dto.request.UserRegistration;
 import com.crazym8nd.individualsapi.exceptionhandling.InvalidCreatingUserException;
 import com.crazym8nd.individualsapi.util.AuthUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
@@ -34,7 +35,8 @@ class KeycloakServiceImplTest {
     private KeycloakServiceImpl keycloakService;
 
     @Test
-    public void givenInvalidRegistrationRequest_whenRegisterUser_thenReturnInvalidCredentials() {
+    @DisplayName("Should return InvalidCreatingUserException for invalid creating of user")
+    public void givenInvalidRegistrationRequest_whenRegisterUser_thenReturnInvalidCreatingUserException() {
         // Given
         UserRegistration userRegistration = AuthUtils.invalidJsonForCreatingTest();
         String role = "MERCHANTS";

@@ -4,6 +4,7 @@ package com.crazym8nd.individualsapi.service.impl;
 import com.crazym8nd.individualsapi.dto.request.LoginRequest;
 import com.crazym8nd.individualsapi.dto.response.ResponseTokenLogin;
 import com.crazym8nd.individualsapi.exceptionhandling.InvalidLoginException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -47,6 +48,7 @@ class AuthServiceImplTest {
 //    }
 
     @Test
+    @DisplayName("Should return InvalidLoginException for invalid login request")
     public void givenInvalidLoginRequest_whenLogin_thenThrowInvalidLoginException() {
         // Given
         LoginRequest request = new LoginRequest(null, null);
